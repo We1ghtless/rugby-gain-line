@@ -15,16 +15,15 @@ export default {
   },
   methods: {
     onLoad() {
-
       const axios = require('axios').default;
       const apiKey = 'a5y3ft5z9a2ejvcym8zkh3xe'
 
       axios({
         method: 'get',
-        url: `https://api.sportradar.com/rugby-union/trial/v3/en/compeitions.json?api_key=${apiKey}`,
+        url: `http://api.sportradar.us/rugby-union/trial/v3/en/competitions/sr:competition:421/seasons.json?api_key=${apiKey}`,
         headers: {
-          'Access-Control-Allow-Origin': '*',
-      }
+          'Access-Control-Allow-Origin':'*',
+        }
       })
       .then(res => (this.info = res))
       .catch(err => console.error(err));

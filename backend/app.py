@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 import os
+import http.client
 
 #Init app
 app = Flask(__name__)
@@ -79,6 +80,18 @@ def delete_selection(id):
     db.session.commit()
 
     return selection_schema.jsonify(selection)
+
+# #Rugby Request Test
+# @app.route('/', methods=['GET'])
+# def get_rugby():
+#     conn = http.client.HTTPSConnection("https://api.sportradar.com/")
+#
+#     conn.request("GET", "/rugby-union/trial/v3/en/competitions.xml?api_key=a5y3ft5z9a2ejvcym8zkh3xe")
+#
+#     res = conn.getresponse()
+#     data = res.read()
+#
+#     print(data.decode("utf-8"))
 
 #Run Server
 if __name__ == '__main__':
