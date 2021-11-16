@@ -1,7 +1,8 @@
 <template>
   <div class="Testing">
     <input type="button" value="submit" @click="getComps()">
-    <p v-for="item in this.info.data" :key="item.id">{{item}}</p>
+    <!-- <p v-for="item in this.info.data" :key="item.id">{{item}}</p> -->
+    {{this.info}}
   </div>
 </template>
 

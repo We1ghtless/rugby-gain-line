@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 from flask_cors import CORS
-import os, requests, json
+import os, requests, json, datetime
 
 
 #Init app
@@ -28,7 +28,7 @@ class Season(db.Model):
     end_date = db.Column(db.Date)
     year = db.Column(db.String(200))
 
-    def __init__ (self, season_id, name, sart_date, end_date, year):
+    def __init__ (self, season_id, name, start_date, end_date, year):
         self.season_id = season_id
         self.name = name
         self.start_date = start_date
@@ -45,25 +45,25 @@ season_schema = SeasonSchema()
 seasons_schema = SeasonSchema(many=True)
 
 # Get competition info
-def get_comps():
-    data = requests.get('https://api.sportradar.com/rugby-union/trial/v3/en/seasons.json?api_key=a5y3ft5z9a2ejvcym8zkh3xe')
-
-    competitions = data.json()
-    all_competitions = []
-
-    for i in all_competitions:
-        season_id = i['season_id']
-        name = i['name']
-        start_date = i['start_date']
-        end_date = i['end_date']
-        year = i['year']
-
-        new_season = Season(season_id, name, start_date, end_date, year)
-
-        db.session.add(new_season)
-        db.seassion.commit
-
-        return product_schema.jsonify(new_season)
+# def get_comps():
+#     data = requests.get('https://api.sportradar.com/rugby-union/trial/v3/en/seasons.json?api_key=a5y3ft5z9a2ejvcym8zkh3xe')
+#
+#     competitions = data.json()
+#     all_competitions = []
+#
+#     for i in all_competitions:
+#         season_id = i['season_id']
+#         name = i['name']
+#         start_date = i['start_date']
+#         end_date = i['end_date']
+#         year = i['year']
+#
+#         new_season = Season(season_id, name, start_date, end_date, year)
+#
+#         db.session.add(new_season)
+#         db.session.commit()
+#
+#         return product_schema.jsonify(new_season)
 
 
 # Create a Selection
@@ -122,17 +122,20 @@ def get_rugby():
     competitions = data.json()
     all_competitions = []
 
+    for i in competitions['seasons']:
+        all_competitions.append(i)
+
     for i in all_competitions:
-        season_id = i['season_id']
+        season_id = i['id']
         name = i['name']
-        start_date = i['start_date']
-        end_date = i['end_date']
+        start_date = datetime.datetime.strptime(i['start_date'], '%Y-%m-%d')
+        end_date = datetime.datetime.strptime(i['end_date'], '%Y-%m-%d')
         year = i['year']
 
         new_season = Season(season_id, name, start_date, end_date, year)
 
         db.session.add(new_season)
-        db.seassion.commit
+        db.session.commit()
 
         return product_schema.jsonify(new_season)
 
