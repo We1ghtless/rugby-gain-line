@@ -1,37 +1,55 @@
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
-import os
-import http.client
+from flask_cors import CORS
+import os, requests, json
+
 
 #Init app
 app = Flask(__name__)
+CORS(app)
 basedir = os.path.abspath(os.path.dirname(__file__))
+
+def get_comps():
+    data = requests.get('https://api.sportradar.com/rugby-union/trial/v3/en/seasons.json?api_key=a5y3ft5z9a2ejvcym8zkh3xe')
+
+    competitions = data.json()
+    all_competitions = []
+
 
 #Database
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'db.sqlite')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
 #Init db
 db = SQLAlchemy(app)
 #Init ma
 ma = Marshmallow(app)
 
-# Selection Class/Model
-class Selection(db.Model):
+# Season Model
+class Season(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), unique=True)
+    season_id = db.Column(db.Integer)
+    name = db.Column(db.String(200), unique=True)
+    start_date = db.Column(db.Date)
+    end_date = db.Column(db.Date)
+    year = db.Column(db.String(200))
 
-    def __init__(self, name):
+    def __init__ (self, season_id, name, sart_date, end_date, year):
+        self.season_id = season_id
         self.name = name
+        self.start_date = start_date
+        self.end_date = end_date
+        self.year = year
 
-# Selection Schema
-class SelectionSchema(ma.Schema):
+# Season Schema
+class SeasonSchema(ma.Schema):
     class Meta:
-        fields = ('id', 'name')
+        fields = ('id', 'season_id', 'name', 'start_date', 'end_date', 'year')
 
 #Init Schema
-selection_schema = SelectionSchema()
-selections_schema = SelectionSchema(many=True)
+season_schema = SeasonSchema()
+seasons_schema = SeasonSchema(many=True)
 
 # Create a Selection
 @app.route('/selection', methods=['POST'])
@@ -81,17 +99,22 @@ def delete_selection(id):
 
     return selection_schema.jsonify(selection)
 
-# #Rugby Request Test
-# @app.route('/', methods=['GET'])
-# def get_rugby():
-#     conn = http.client.HTTPSConnection("https://api.sportradar.com/")
-#
-#     conn.request("GET", "/rugby-union/trial/v3/en/competitions.xml?api_key=a5y3ft5z9a2ejvcym8zkh3xe")
-#
-#     res = conn.getresponse()
-#     data = res.read()
-#
-#     print(data.decode("utf-8"))
+#Rugby Request Test
+@app.route('/', methods=['GET'])
+def get_rugby():
+
+    x = requests.get('https://api.sportradar.com/rugby-union/trial/v3/en/competitions.json?api_key=a5y3ft5z9a2ejvcym8zkh3xe')
+
+    data = x.json()
+    allPlayers = data['season_players']
+
+    for i in allPlayers:
+        players.append(i)
+
+    return json.dumps(allPlayers)
+
+# { "id": "sr:season:86744", "name": "United Rugby Championship 21/22", "start_date": "2021-09-24", "end_date": "2022-06-25", "year": "21/22", "competition_id": "sr:competition:419" }
+
 
 #Run Server
 if __name__ == '__main__':
