@@ -1,7 +1,7 @@
 <template>
   <div class="Testing">
-    <input type="button" value="submit" @click="onLoad()">
-    <p>{{this.info}}</p>
+    <input type="button" value="submit" @click="getComps()">
+    <p v-for="item in this.info.data" :key="item.id">{{item}}</p>
   </div>
 </template>
 
@@ -14,16 +14,12 @@ export default {
     }
   },
   methods: {
-    onLoad() {
+    getComps() {
       const axios = require('axios').default;
-      const apiKey = 'a5y3ft5z9a2ejvcym8zkh3xe'
 
       axios({
         method: 'get',
-        url: `http://api.sportradar.us/rugby-union/trial/v3/en/competitions/sr:competition:421/seasons.json?api_key=${apiKey}`,
-        headers: {
-          'Access-Control-Allow-Origin':'*',
-        }
+        url: `http://127.0.0.1:5000/`
       })
       .then(res => (this.info = res))
       .catch(err => console.error(err));
